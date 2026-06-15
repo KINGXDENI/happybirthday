@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { finalMessage } from '../data';
 import { Heart, Pin, Send, Trash2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import HeartQR from './HeartQR';
+
 
 interface Wish {
   id: string;
@@ -153,6 +153,8 @@ const CinematicFinale = () => {
             {finalMessage.signature}
           </span>
         </div>
+
+
       </motion.div>
 
       {/* WISH WALL / PAPAN HARAPAN SECTION */}
