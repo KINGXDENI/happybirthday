@@ -48,28 +48,35 @@ function App() {
     };
   }, []);
 
+  // Strict check to ensure background music is paused on Pin, Intro, Loading, Chat, and QR pages
+  useEffect(() => {
+    if (step === 'pin' || step === 'intro' || step === 'loading' || step === 'chat' || step === 'qr') {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        setIsMusicPlaying(false);
+      }
+    }
+  }, [step]);
+
   const unlockAudio = () => {
-    // Play and immediately pause with muted state to unlock Chrome's strict autoplay restrictions without leakage sounds
-    if (audioRef.current) {
-      audioRef.current.muted = true;
-      audioRef.current.play().then(() => {
-        audioRef.current?.pause();
-        if (audioRef.current) audioRef.current.muted = false;
-      }).catch(() => {});
-    }
-    if (chatSoundRef.current) {
-      chatSoundRef.current.muted = true;
-      chatSoundRef.current.play().then(() => {
-        chatSoundRef.current?.pause();
-        if (chatSoundRef.current) chatSoundRef.current.muted = false;
-      }).catch(() => {});
-    }
-    if (voiceSoundRef.current) {
-      voiceSoundRef.current.muted = true;
-      voiceSoundRef.current.play().then(() => {
-        voiceSoundRef.current?.pause();
-        if (voiceSoundRef.current) voiceSoundRef.current.muted = false;
-      }).catch(() => {});
+    try {
+      // Create and resume a silent AudioContext to unlock all HTML5 Audios in Chrome/Safari on first user interaction
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime); // silent
+        osc.start(0);
+        osc.stop(0.001);
+      }
+    } catch (e) {
+      // AudioContext blocked
     }
   };
 
