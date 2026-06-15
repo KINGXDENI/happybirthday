@@ -24,52 +24,17 @@ function App() {
   });
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const notificationAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize Audio with Ed Sheeran - Perfect.mp3 and chatmasuk.mp3
+  // Initialize Audio with Ed Sheeran - Perfect.mp3
   useEffect(() => {
     const audio = new Audio('/sounds/Ed Sheeran - Perfect.mp3');
     audio.loop = true;
     audioRef.current = audio;
 
-    const notifAudio = new Audio('/sounds/chatmasuk.mp3');
-    notifAudio.preload = 'auto';
-    notificationAudioRef.current = notifAudio;
-
-    // Global click listener to unlock Audio Context (browser autoplay compatibility)
-    const unlockAudio = () => {
-      if (audioRef.current) {
-        audioRef.current.play().then(() => {
-          audioRef.current?.pause();
-        }).catch(() => {});
-      }
-      if (notificationAudioRef.current) {
-        notificationAudioRef.current.play().then(() => {
-          notificationAudioRef.current?.pause();
-        }).catch(() => {});
-      }
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
-    };
-
-    window.addEventListener('click', unlockAudio);
-    window.addEventListener('touchstart', unlockAudio);
-
     return () => {
       audio.pause();
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
-
-  const playChatInSound = () => {
-    if (notificationAudioRef.current) {
-      notificationAudioRef.current.currentTime = 0;
-      notificationAudioRef.current.play().catch(err => {
-        console.log('Notification play failed due to browser restriction', err);
-      });
-    }
-  };
 
   const startMusic = () => {
     if (audioRef.current && !isMusicPlaying) {
@@ -195,13 +160,10 @@ function App() {
             transition={{ duration: 0.5 }}
             className="w-full h-screen"
           >
-            <WhatsAppChat 
-              onOpenCard={() => {
-                setStep('quiz');
-                startMusic();
-              }}
-              onPlayNotificationSound={playChatInSound}
-            />
+            <WhatsAppChat onOpenCard={() => {
+              setStep('quiz');
+              startMusic();
+            }} />
           </motion.div>
         )}
 

@@ -9,7 +9,6 @@ import { chatSteps } from '../data';
 
 interface WhatsAppChatProps {
   onOpenCard: () => void;
-  onPlayNotificationSound: () => void;
 }
 
 interface DisplayMessage {
@@ -23,7 +22,7 @@ interface DisplayMessage {
   timestamp: string;
 }
 
-const WhatsAppChat = ({ onOpenCard, onPlayNotificationSound }: WhatsAppChatProps) => {
+const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -35,8 +34,19 @@ const WhatsAppChat = ({ onOpenCard, onPlayNotificationSound }: WhatsAppChatProps
   const [audioProgress, setAudioProgress] = useState(0);
   const audioIntervalRef = useRef<any>(null);
   const processedStepsRef = useRef<Record<string, boolean>>({});
-
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  // Preload incoming chat sound to prevent network latency issues when deployed
+  useEffect(() => {
+    chatSoundRef.current = new Audio('/sounds/chatmasuk.mp3');
+    chatSoundRef.current.preload = 'auto';
+    return () => {
+      if (chatSoundRef.current) {
+        chatSoundRef.current.pause();
+      }
+    };
+  }, []);
 
   // Helper to get current timestamp
   const getFormattedTime = () => {
@@ -48,7 +58,11 @@ const WhatsAppChat = ({ onOpenCard, onPlayNotificationSound }: WhatsAppChatProps
   const playNotificationSound = (type: 'sent' | 'received') => {
     try {
       if (type === 'received') {
-        onPlayNotificationSound();
+        const audio = chatSoundRef.current;
+        if (audio) {
+          audio.currentTime = 0; // Reset track to start
+          audio.play().catch(e => console.log('Notification play blocked', e));
+        }
         return;
       }
 
