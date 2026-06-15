@@ -5,10 +5,10 @@ import { SECRET_PIN } from '../data';
 
 interface PinLockProps {
   onSuccess: () => void;
-  onOpenShare?: () => void;
+
 }
 
-const PinLock = ({ onSuccess, onOpenShare }: PinLockProps) => {
+const PinLock = ({ onSuccess }: PinLockProps) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
 
@@ -162,14 +162,7 @@ const PinLock = ({ onSuccess, onOpenShare }: PinLockProps) => {
           Hint: Our Special Date
         </p>
 
-        {/* {onOpenShare && (
-          <button
-            onClick={onOpenShare}
-            className="mt-6 text-white/10 hover:text-white/30 text-[9px] sm:text-[10px] font-mono tracking-widest uppercase cursor-pointer transition-colors"
-          >
-            Buat QR Code Cinta 💖
-          </button>
-        )} */}
+       
       </motion.div>
     </div>
   );
