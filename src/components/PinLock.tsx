@@ -5,9 +5,10 @@ import { SECRET_PIN } from '../data';
 
 interface PinLockProps {
   onSuccess: () => void;
+  onInteraction?: () => void;
 }
 
-const PinLock = ({ onSuccess }: PinLockProps) => {
+const PinLock = ({ onSuccess, onInteraction }: PinLockProps) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
 
@@ -76,12 +77,14 @@ const PinLock = ({ onSuccess }: PinLockProps) => {
     if (pin.length < 4) {
       playSound('tap');
       setPin(prev => prev + num);
+      onInteraction?.();
     }
   };
 
   const handleDelete = () => {
     playSound('tap');
     setPin(prev => prev.slice(0, -1));
+    onInteraction?.();
   };
 
   useEffect(() => {

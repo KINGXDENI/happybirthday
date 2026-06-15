@@ -3,13 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Video, Phone, MoreVertical, Smile, Paperclip,
   Mic, Send, CheckCheck, Play, Pause, Heart,
-  Mail, MessageSquare
+  Mail, MessageSquare, Lock
 } from 'lucide-react';
 import { chatSteps } from '../data';
 
 interface WhatsAppChatProps {
   onOpenCard: () => void;
+  chatSound?: HTMLAudioElement | null;
+  voiceSound?: HTMLAudioElement | null;
 }
+
+const formatDuration = (secs: number) => {
+  if (isNaN(secs)) return '0:00';
+  const minutes = Math.floor(secs / 60);
+  const seconds = Math.floor(secs % 60);
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+};
 
 interface DisplayMessage {
   id: string;
@@ -22,31 +31,18 @@ interface DisplayMessage {
   timestamp: string;
 }
 
-const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
+const WhatsAppChat = ({ onOpenCard, chatSound, voiceSound }: WhatsAppChatProps) => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [inputText, setInputText] = useState('');
 
-  // Audio Player State for simulated Voice Note
+  // Audio Player State for Voice Note
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
-  const audioIntervalRef = useRef<any>(null);
   const processedStepsRef = useRef<Record<string, boolean>>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const chatSoundRef = useRef<HTMLAudioElement | null>(null);
-
-  // Preload incoming chat sound to prevent network latency issues when deployed
-  useEffect(() => {
-    chatSoundRef.current = new Audio('/sounds/chatmasuk.mp3');
-    chatSoundRef.current.preload = 'auto';
-    return () => {
-      if (chatSoundRef.current) {
-        chatSoundRef.current.pause();
-      }
-    };
-  }, []);
 
   // Helper to get current timestamp
   const getFormattedTime = () => {
@@ -58,10 +54,9 @@ const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
   const playNotificationSound = (type: 'sent' | 'received') => {
     try {
       if (type === 'received') {
-        const audio = chatSoundRef.current;
-        if (audio) {
-          audio.currentTime = 0; // Reset track to start
-          audio.play().catch(e => console.log('Notification play blocked', e));
+        if (chatSound) {
+          chatSound.currentTime = 0; // Reset track to start
+          chatSound.play().catch(e => console.log('Notification play blocked', e));
         }
         return;
       }
@@ -142,31 +137,52 @@ const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
     }
   }, [currentStepIndex]);
 
-  // Handle Voice Note simulation play/pause
-  const togglePlayAudio = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
-    } else {
-      setIsPlaying(true);
-      audioIntervalRef.current = setInterval(() => {
-        setAudioProgress(prev => {
-          if (prev >= 100) {
-            setIsPlaying(false);
-            if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
-            return 0;
-          }
-          return prev + 5;
-        });
-      }, 500);
-    }
-  };
+  // Synchronize Voice Note progress and state with the real audio track
+  useEffect(() => {
+    if (!voiceSound) return;
 
+    const handleTimeUpdate = () => {
+      if (voiceSound.duration) {
+        setAudioProgress((voiceSound.currentTime / voiceSound.duration) * 100);
+      }
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setAudioProgress(0);
+    };
+
+    voiceSound.addEventListener('timeupdate', handleTimeUpdate);
+    voiceSound.addEventListener('ended', handleEnded);
+
+    return () => {
+      voiceSound.removeEventListener('timeupdate', handleTimeUpdate);
+      voiceSound.removeEventListener('ended', handleEnded);
+    };
+  }, [voiceSound]);
+
+  // Clean up and stop voice note on unmount
   useEffect(() => {
     return () => {
-      if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
+      if (voiceSound) {
+        voiceSound.pause();
+        voiceSound.currentTime = 0;
+      }
     };
-  }, []);
+  }, [voiceSound]);
+
+  // Handle Voice Note real audio play/pause
+  const togglePlayAudio = () => {
+    if (!voiceSound) return;
+
+    if (isPlaying) {
+      voiceSound.pause();
+      setIsPlaying(false);
+    } else {
+      voiceSound.play().catch(e => console.log('Voice note play blocked', e));
+      setIsPlaying(true);
+    }
+  };
 
   // Handle Quick Reply selection
   const handleSelectOption = (option: string) => {
@@ -255,7 +271,7 @@ const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
                   className="mx-auto my-2 max-w-[85%] text-center"
                 >
                   <div className="bg-[#182229] border border-[#222e35] text-[#ffe69c] text-[11.5px] px-3.5 py-1.5 rounded-lg inline-flex items-start gap-1.5 leading-relaxed shadow-sm">
-                    <span className="mt-0.5 text-amber-300 flex-shrink-0"></span>
+                    <Lock size={12} className="text-[#ffe69c] flex-shrink-0 mt-0.5" />
                     <span>{msg.content}</span>
                   </div>
                 </motion.div>
@@ -355,7 +371,7 @@ const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
                           })}
                         </div>
                         <span className="text-[10px] text-[#8696a0]">
-                          {msg.duration}
+                          {voiceSound && voiceSound.duration ? formatDuration(voiceSound.duration) : msg.duration}
                         </span>
                       </div>
                     </div>

@@ -24,17 +24,48 @@ function App() {
   });
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const chatSoundRef = useRef<HTMLAudioElement | null>(null);
+  const voiceSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize Audio with Ed Sheeran - Perfect.mp3
+  // Initialize Audios (Perfect, Chat incoming, and Voice note) and register them early
   useEffect(() => {
     const audio = new Audio('/sounds/Ed Sheeran - Perfect.mp3');
     audio.loop = true;
     audioRef.current = audio;
 
+    const chatSound = new Audio('/sounds/chatmasuk.mp3');
+    chatSound.preload = 'auto';
+    chatSoundRef.current = chatSound;
+
+    const voiceSound = new Audio('/sounds/medan.mp3');
+    voiceSound.preload = 'auto';
+    voiceSoundRef.current = voiceSound;
+
     return () => {
       audio.pause();
+      chatSound.pause();
+      voiceSound.pause();
     };
   }, []);
+
+  const unlockAudio = () => {
+    // Play and immediately pause to unlock Chrome's strict autoplay restrictions on user interaction
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause();
+      }).catch(() => {});
+    }
+    if (chatSoundRef.current) {
+      chatSoundRef.current.play().then(() => {
+        chatSoundRef.current?.pause();
+      }).catch(() => {});
+    }
+    if (voiceSoundRef.current) {
+      voiceSoundRef.current.play().then(() => {
+        voiceSoundRef.current?.pause();
+      }).catch(() => {});
+    }
+  };
 
   const startMusic = () => {
     if (audioRef.current && !isMusicPlaying) {
@@ -92,7 +123,7 @@ function App() {
             transition={{ duration: 0.5 }}
             className="w-full h-screen"
           >
-            <PinLock onSuccess={handlePinSuccess} />
+            <PinLock onSuccess={handlePinSuccess} onInteraction={unlockAudio} />
           </motion.div>
         )}
 
@@ -160,10 +191,14 @@ function App() {
             transition={{ duration: 0.5 }}
             className="w-full h-screen"
           >
-            <WhatsAppChat onOpenCard={() => {
-              setStep('quiz');
-              startMusic();
-            }} />
+            <WhatsAppChat 
+              onOpenCard={() => {
+                setStep('quiz');
+                startMusic();
+              }} 
+              chatSound={chatSoundRef.current}
+              voiceSound={voiceSoundRef.current}
+            />
           </motion.div>
         )}
 

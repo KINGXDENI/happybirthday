@@ -143,11 +143,28 @@ export const chatSteps: ChatStep[] = [
     options: ['Iya, mabar seru banget dulu', 'Awal mula segalanya ya']
   },
   {
+    id: 'msg-5-reply',
+    sender: 'partner',
+    type: 'text',
+    content: 'Hahaha iya! Aku masih simpan loh screenshot lobby kita pas mabar dulu. Inget lobby ini kan?',
+    delay: 1500
+  },
+  {
+    id: 'msg-5a',
+    sender: 'partner',
+    type: 'image',
+    mediaUrl: '/ss_ML.jpeg',
+    title: 'SS Lobby ML Kita',
+    content: 'Tempat awal mula kita mabar bareng.',
+    delay: 2000,
+    options: ['Ya ampun, kamu masih simpan? 🥹', 'Wah, nostalgia banget!']
+  },
+  {
     id: 'msg-6',
     sender: 'partner',
     type: 'text',
-    content: 'Hahaha iya! Lanjut dari situ kita saling bagi kontak Line.',
-    delay: 1500
+    content: 'Hehe iya dong. Nah, lanjut dari situ kita saling bagi kontak Line.',
+    delay: 1800
   },
   {
     id: 'msg-7',
