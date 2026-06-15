@@ -49,20 +49,26 @@ function App() {
   }, []);
 
   const unlockAudio = () => {
-    // Play and immediately pause to unlock Chrome's strict autoplay restrictions on user interaction
+    // Play and immediately pause with muted state to unlock Chrome's strict autoplay restrictions without leakage sounds
     if (audioRef.current) {
+      audioRef.current.muted = true;
       audioRef.current.play().then(() => {
         audioRef.current?.pause();
+        if (audioRef.current) audioRef.current.muted = false;
       }).catch(() => {});
     }
     if (chatSoundRef.current) {
+      chatSoundRef.current.muted = true;
       chatSoundRef.current.play().then(() => {
         chatSoundRef.current?.pause();
+        if (chatSoundRef.current) chatSoundRef.current.muted = false;
       }).catch(() => {});
     }
     if (voiceSoundRef.current) {
+      voiceSoundRef.current.muted = true;
       voiceSoundRef.current.play().then(() => {
         voiceSoundRef.current?.pause();
+        if (voiceSoundRef.current) voiceSoundRef.current.muted = false;
       }).catch(() => {});
     }
   };
