@@ -5,7 +5,6 @@ import { SECRET_PIN } from '../data';
 
 interface PinLockProps {
   onSuccess: () => void;
-
 }
 
 const PinLock = ({ onSuccess }: PinLockProps) => {
@@ -162,7 +161,7 @@ const PinLock = ({ onSuccess }: PinLockProps) => {
           Hint: Our Special Date
         </p>
 
-       
+
       </motion.div>
     </div>
   );

@@ -92,7 +92,7 @@ function App() {
             transition={{ duration: 0.5 }}
             className="w-full h-screen"
           >
-            <PinLock onSuccess={handlePinSuccess} onOpenShare={() => setStep('qr')} />
+            <PinLock onSuccess={handlePinSuccess} />
           </motion.div>
         )}
 
