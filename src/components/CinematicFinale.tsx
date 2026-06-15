@@ -153,14 +153,6 @@ const CinematicFinale = () => {
             {finalMessage.signature}
           </span>
         </div>
-
-        {/* Heart QR Code Section (Added inside the letter sheet) */}
-        <div className="flex flex-col items-center mt-12 pt-8 border-t border-dashed border-zinc-100">
-          <p className="font-mono text-[9px] tracking-[0.3em] text-zinc-400 uppercase mb-6">Scan for a Surprise</p>
-          <div className="p-4 bg-white rounded-2xl shadow-sm border border-zinc-50">
-            <HeartQR value={window.location.href} size={160} />
-          </div>
-        </div>
       </motion.div>
 
       {/* WISH WALL / PAPAN HARAPAN SECTION */}
