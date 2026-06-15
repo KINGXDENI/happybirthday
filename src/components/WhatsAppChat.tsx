@@ -9,6 +9,7 @@ import { chatSteps } from '../data';
 
 interface WhatsAppChatProps {
   onOpenCard: () => void;
+  onPlayNotificationSound: () => void;
 }
 
 interface DisplayMessage {
@@ -22,7 +23,7 @@ interface DisplayMessage {
   timestamp: string;
 }
 
-const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
+const WhatsAppChat = ({ onOpenCard, onPlayNotificationSound }: WhatsAppChatProps) => {
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -47,8 +48,7 @@ const WhatsAppChat = ({ onOpenCard }: WhatsAppChatProps) => {
   const playNotificationSound = (type: 'sent' | 'received') => {
     try {
       if (type === 'received') {
-        const audio = new Audio('/sounds/chatmasuk.mp3');
-        audio.play().catch(e => console.log('Notification play blocked', e));
+        onPlayNotificationSound();
         return;
       }
 
